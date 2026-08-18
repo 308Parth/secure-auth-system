@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Auth Test Client</title>
+<style>
+  /* Intentionally minimal — this file exists so you can test the API, not judge the UI */
+  body { font-family: monospace; max-width: 700px; margin: 30px auto; padding: 0 15px; }
+  fieldset { margin-bottom: 20px; }
+  label { display: block; margin-top: 8px; }
+  input, button, select { font-family: monospace; font-size: 14px; padding: 4px; margin-top: 2px; }
+  button { cursor: pointer; margin-right: 6px; margin-top: 8px; }
+  pre { background: #eee; padding: 10px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; }
+  .row { margin-bottom: 6px; }
+  hr { margin: 25px 0; }
+</style>
+</head>
+<body>
+
+<h1>Auth Test Client (Do not build a new GUI; use this page only)</h1>
+<fieldset>
+  <legend>Backend mode</legend>
+  <label><input type="radio" id="mockMode" name="backendMode" value="mock" checked> Mock (in-browser, mock-api.js + seed-data.json) — no backend needed, just to see how the GUI behaves</label>
+  <label><input type="radio" name="backendMode" value="custom"> Custom REST backend (Node/Express or Python) — hits the Base URL below</label>
+  <label><input type="radio" name="backendMode" value="appwrite"> Appwrite (appwrite-adapter.js talks to Appwrite directly via its Web SDK)</label>
+</fieldset>
+
+<fieldset>
+  <legend>Custom backend settings (only used in "Custom REST backend" mode)</legend>
+  <label>Base URL <input id="baseUrl" value="http://localhost:3000" size="30"></label>
+  <label><input type="checkbox" id="useCookies"> Backend uses cookie sessions (send credentials)</label>
+</fieldset>
+
+<fieldset>
+  <legend>Appwrite settings (only used in "Appwrite" mode)</legend>
+  <label>Endpoint <input id="awEndpoint" value="https://cloud.appwrite.io/v1" size="40"></label>
+  <label>Project ID <input id="awProjectId" value="YOUR_PROJECT_ID" size="30"></label>
+  <label>Database ID <input id="awDatabaseId" value="YOUR_DATABASE_ID" size="30"></label>
+  <label>Files collection ID <input id="awFilesCollectionId" value="files" size="30"></label>
+  <label>Storage bucket ID <input id="awBucketId" value="user-files" size="30"></label>
+  <p>These map to resources you create yourself in the Appwrite console — see README for the exact setup (attributes, permissions, indexes).</p>
+</fieldset>
+
+<hr>
+
+<fieldset>
+  <legend>Quick-fill seeded test users</legend>
+  <p>These are just convenience buttons that fill the login form below — they are NOT real credentials, edit them to match whatever you seed.</p>
+  <button onclick="fillUser('alice@example.com','Password123!')">User A: alice@example.com</button>
+  <button onclick="fillUser('bob@example.com','Password123!')">User B: bob@example.com</button>
+  <button onclick="fillUser('carol@example.com','Password123!')">User C: carol@example.com</button>
+</fieldset>
+
+<fieldset>
+  <legend>Register</legend>
+  <label>Email <input id="regEmail" value="alice@example.com"></label>
+  <label>Password <input id="regPassword" type="text" value="Password123!"></label>
+  <button onclick="doRegister()">Register</button>
+</fieldset>
+
+<fieldset>
+  <legend>Login</legend>
+  <label>Email <input id="loginEmail" value="alice@example.com"></label>
+  <label>Password <input id="loginPassword" type="text" value="Password123!"></label>
+  <button onclick="doLogin()">Login</button>
+  <button onclick="doLogout()">Logout</button>
+</fieldset>
+
+<fieldset>
+  <legend>Session token (only needed if backend is JWT/bearer, not cookies)</legend>
+  <label>Token <input id="token" size="60"></label>
+</fieldset>
+
+<fieldset>
+  <legend>Protected actions</legend>
+  <button onclick="getMe()">GET /me</button>
+  <button onclick="getFiles()">GET /files</button>
+  <label>File ID <input id="fileId" value="1" size="10"></label>
+  <button onclick="getFileById()">GET /files/:id</button>
+  <button onclick="downloadFileById()">Download /files/:id</button>
+</fieldset>
+
+<h3>Response</h3>
+<pre id="output">(responses will show up here)</pre>
+
+<script src="mock-api.js"></script>
+<!-- Appwrite Web SDK & adapter (Uncomment or include these when implementing the Appwrite backend mode) -->
+<!--
+<script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.0"></script>
+<script src="appwrite-adapter.js"></script>
+-->
+<script>
+function base() { return document.getElementById('baseUrl').value.replace(/\/$/, ''); }
+function useCookies() { return document.getElementById('useCookies').checked; }
+function tokenVal() { return document.getElementById('token').value.trim(); }
+function log(label, data) {
+  document.getElementById('output').textContent = label + '\n\n' + (typeof data === 'string' ? data : JSON.stringify(data, null, 2));
+}
+
+function fillUser(email, password) {
+  document.getElementById('loginEmail').value = email;
+  document.getElementById('loginPassword').value = password;
+  document.getElementById('regEmail').value = email;
+  document.getElementById('regPassword').value = password;
+}
+
+async function request(path, options = {}) {
+  options.headers = options.headers || {};
+  if (!useCookies() && tokenVal()) {
+    options.headers['Authorization'] = 'Bearer ' + tokenVal();
+  }
+  if (useCookies()) {
+    options.credentials = 'include';
+  }
+  const res = await fetch(base() + path, options);
+  let body;
+  try { body = await res.json(); } catch (e) { body = await res.text(); }
+  return { status: res.status, body };
+}
+
+async function doRegister() {
+  const email = document.getElementById('regEmail').value;
+  const password = document.getElementById('regPassword').value;
+  const result = await request('/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+  log('POST /register', result);
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  const result = await request('/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+  // If the backend returns a JWT in the body, auto-fill the token field
+  if (result.body && result.body.token) {
+    document.getElementById('token').value = result.body.token;
+  }
+  log('POST /login', result);
+}
+
+async function doLogout() {
+  const result = await request('/logout', { method: 'POST' });
+  document.getElementById('token').value = '';
+  log('POST /logout', result);
+}
+
+async function getMe() {
+  const result = await request('/me', { method: 'GET' });
+  log('GET /me', result);
+}
+
+async function getFiles() {
+  const result = await request('/files', { method: 'GET' });
+  log('GET /files', result);
+}
+
+async function getFileById() {
+  const id = document.getElementById('fileId').value;
+  const result = await request('/files/' + id, { method: 'GET' });
+  log('GET /files/' + id, result);
+}
+
+async function downloadFileById() {
+  const id = document.getElementById('fileId').value;
+  const headers = {};
+  if (!useCookies() && tokenVal()) headers['Authorization'] = 'Bearer ' + tokenVal();
+  const res = await fetch(base() + '/files/' + id + '/download', {
+    headers,
+    credentials: useCookies() ? 'include' : 'same-origin'
+  });
+  if (!res.ok) {
+    log('GET /files/' + id + '/download', { status: res.status, body: await res.text() });
+    return;
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'file-' + id;
+  a.click();
+  log('GET /files/' + id + '/download', { status: res.status, note: 'File download triggered.' });
+}
+</script>
+
+</body>
+</html>

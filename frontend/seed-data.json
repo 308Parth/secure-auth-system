@@ -1,0 +1,96 @@
+{
+  "_note": "Sample seed data for local development only. Passwords here are PLAINTEXT placeholders meant to be hashed (e.g. bcrypt) by your seed script before insertion into the database — never store or commit real plaintext passwords.",
+
+  "users": [
+    {
+      "id": "usr_001",
+      "email": "alice@example.com",
+      "password": "Password123!",
+      "profile": {
+        "fullName": "Alice Nakamura",
+        "displayName": "alice",
+        "bio": "Product designer who likes clean UIs.",
+        "createdAt": "2025-01-14T09:32:00Z",
+        "role": "user"
+      },
+      "files": [
+        {
+          "id": "file_001",
+          "ownerId": "usr_001",
+          "fileName": "resume_alice.pdf",
+          "mimeType": "application/pdf",
+          "sizeBytes": 84213,
+          "uploadedAt": "2025-01-15T10:02:00Z"
+        },
+        {
+          "id": "file_002",
+          "ownerId": "usr_001",
+          "fileName": "profile_photo.jpg",
+          "mimeType": "image/jpeg",
+          "sizeBytes": 231044,
+          "uploadedAt": "2025-01-16T14:20:00Z"
+        }
+      ]
+    },
+    {
+      "id": "usr_002",
+      "email": "bob@example.com",
+      "password": "Password123!",
+      "profile": {
+        "fullName": "Bob Alvarez",
+        "displayName": "bob",
+        "bio": "Backend engineer, coffee enthusiast.",
+        "createdAt": "2025-02-02T11:15:00Z",
+        "role": "user"
+      },
+      "files": [
+        {
+          "id": "file_003",
+          "ownerId": "usr_002",
+          "fileName": "project_notes.txt",
+          "mimeType": "text/plain",
+          "sizeBytes": 5210,
+          "uploadedAt": "2025-02-03T09:40:00Z"
+        },
+        {
+          "id": "file_004",
+          "ownerId": "usr_002",
+          "fileName": "invoice_march.pdf",
+          "mimeType": "application/pdf",
+          "sizeBytes": 62890,
+          "uploadedAt": "2025-03-01T08:05:00Z"
+        }
+      ]
+    },
+    {
+      "id": "usr_003",
+      "email": "carol@example.com",
+      "password": "Password123!",
+      "profile": {
+        "fullName": "Carol Whitfield",
+        "displayName": "carol",
+        "bio": "QA lead focused on security testing.",
+        "createdAt": "2025-03-10T16:48:00Z",
+        "role": "user"
+      },
+      "files": [
+        {
+          "id": "file_005",
+          "ownerId": "usr_003",
+          "fileName": "test_plan.docx",
+          "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          "sizeBytes": 41200,
+          "uploadedAt": "2025-03-11T12:30:00Z"
+        },
+        {
+          "id": "file_006",
+          "ownerId": "usr_003",
+          "fileName": "vacation.png",
+          "mimeType": "image/png",
+          "sizeBytes": 512300,
+          "uploadedAt": "2025-04-02T18:00:00Z"
+        }
+      ]
+    }
+  ]
+}
