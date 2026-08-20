@@ -1,0 +1,33 @@
+{
+  "name": "backend-custom",
+  "version": "1.0.0",
+  "description": "Plan A: Custom Secure Backend with Express, PostgreSQL & Argon2id",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "seed": "tsx db/seed.ts",
+    "migrate": "tsx db/migrate.ts",
+    "test": "tsx tests/security-eval.test.ts"
+  },
+  "dependencies": {
+    "@types/cors": "^2.8.17",
+    "argon2": "^0.41.1",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "pg": "^8.12.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.7",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.14.9",
+    "@types/pg": "^8.11.6",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.3"
+  }
+}
